@@ -1,5 +1,6 @@
 const express = require('express');
 const https = require('https');
+const request = require('request');
 const router = express.Router();
 
 let question = '';
@@ -19,28 +20,17 @@ let download = function (url, dest, cb) {
   });
 };
 
-router.post('/savetext', function (request, response) {
-  console.log('POST /savetext');
+router.post('/savetext', (req, res) => {
+  question = req.body.text;
 
-  // Save request.body
-  console.log(request.body);
-  question = request.body.text;
-
-  response.writeHead(200, { 'Content-Type': 'text/html' });
-  response.end('thanks');
+  res.json({ success: true });
 });
 
-router.post('/saveans', function (request, response) {
-  console.log('POST /saveans');
-
-  // Save request.body
-  console.log(request.body);
-  wavurl = request.body.url + '.mp3';
+router.post('/saveans', (req, res) => {
+  wavurl = req.body.url + '.mp3';
   download(wavurl, 'tmp.wav', read);
 
-
-  response.writeHead(200, { 'Content-Type': 'text/html' });
-  response.end('thanks');
+  res.json({ success: true });
 });
 
 let read = () => {
@@ -73,13 +63,8 @@ let read = () => {
 
 };
 
-router.get('/get', function (request, response) {
-  response.end('{"question": ' + question + ', ' + '"solution": ' + solution + '}');
-});
-
-/* GET home page. */
-router.get('/', function (req, res, next) {
-  res.render('index', { title: 'Express' });
+router.get('/get', (req, res) => {
+  res.json({ question, solution });
 });
 
 module.exports = router;
