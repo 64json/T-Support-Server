@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-let lastRates = null;
+let lastRates = 4;
 
 router.post('/', (req, res, next) => {
   const { rates } = req.body;
