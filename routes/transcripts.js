@@ -30,7 +30,7 @@ router.post('/', (req, res, next) => {
       lastTranscripts = { firstSpeaker, conversations };
     })
     .then(() => client.messages.create({
-      body: 'Thank you for contacting our T-Mobile representative. Please take time to rate your experience: https://jasonpark.me/T-Support/#/survey',
+      body: 'Thank you for contacting our T-Mobile representative. Please take time to rate your experience: https://jasonpark.me/T-Support/#/survey?uid=' + Math.random().toString(36).substring(2, 15),
       from: '+13232714615',
       to: '+14703341764',
     }).then(message => message.sid))
