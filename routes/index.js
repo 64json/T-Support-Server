@@ -28,11 +28,11 @@ router.post('/question', (req, res) => {
 
 router.post('/answer', (req, res, next) => {
   const { url } = req.body;
-  download(`${url}.mp3`, 'answer.wav', () => {
+  download(`${url}.mp3`, 'answer.mp3', () => {
     request.post({
       headers: { 'content-type': 'audio/mp3' },
       url: 'https://gateway-wdc.watsonplatform.net/speech-to-text/api/v1/recognize',
-      body: fs.createReadStream('answer.wav'),
+      body: fs.createReadStream('answer.mp3'),
       encoding: null,
       auth: {
         'user': 'apikey',
