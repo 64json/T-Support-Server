@@ -5,7 +5,6 @@ const router = express.Router();
 
 let question = '';
 let solution = '';
-let wavurl = '';
 
 let download = function (url, dest, cb) {
   let file = fs.createWriteStream(dest);
@@ -20,51 +19,38 @@ let download = function (url, dest, cb) {
   });
 };
 
-router.post('/savetext', (req, res) => {
+router.post('/question', (req, res) => {
   question = req.body.text;
 
   res.json({ success: true });
 });
 
-router.post('/saveans', (req, res) => {
-  wavurl = req.body.url + '.mp3';
-  download(wavurl, 'tmp.wav', read);
+router.post('/answer', (req, res, next) => {
+  const { url } = req.body;
+  download(`${url}.mp3`, 'answer.wav', () => {
+    request.post({
+      headers: { 'content-type': 'audio/mp3' },
+      url: 'https://gateway-wdc.watsonplatform.net/speech-to-text/api/v1/recognize',
+      body: fs.createReadStream('answer.wav'),
+      encoding: null,
+      auth: {
+        'user': 'apikey',
+        'pass': 'Wk54vkGwPI8FlZAckH9j9KbNDtJ1dMwdqekaPk5_HxK_',
+      },
+    }, (error, response, body) => {
+      solution = '';
+      if (error) return next(error);
+      let { results } = JSON.parse(body);
+      for (const result of results) {
+        solution += result.alternatives[0].transcript;
+      }
 
-  res.json({ success: true });
-});
+      res.json({ success: true });
+    });
 
-let read = () => {
-  let options = {
-    headers: { 'content-type': 'audio/mp3' },
-    url: 'https://gateway-wdc.watsonplatform.net/speech-to-text/api/v1/recognize',
-    body: fs.createReadStream('tmp.wav'),
-    encoding: null,
-    auth: {
-      'user': 'apikey',
-      'pass': 'Wk54vkGwPI8FlZAckH9j9KbNDtJ1dMwdqekaPk5_HxK_',
-    },
-  };
-  request.post(options, (error, response, body) => {
-    solution = '';
-    if (error) {
-      console.log('Error: ', error);
-      return;
-    }
-    let jsonResponse = JSON.stringify(JSON.parse(body), null, '  ');
-    console.log('JSON Response\n');
-    console.log(jsonResponse);
-    let tmp = JSON.parse(body).results;
-    for (let i = 0; i < tmp.length; ++i) {
-      solution += tmp[i].alternatives[0].transcript;
-    }
-
-    console.log(question, solution);
   });
-
-};
-
-router.get('/get', (req, res) => {
-  res.json({ question, solution });
 });
+
+router.get('/get', (req, res) => res.json({ question, solution }));
 
 module.exports = router;
