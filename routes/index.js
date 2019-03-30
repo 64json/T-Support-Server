@@ -2,6 +2,7 @@ const express = require('express');
 const https = require('https');
 const request = require('request');
 const router = express.Router();
+const fs = require('fs');
 
 let question = '';
 let solution = '';
